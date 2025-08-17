@@ -1,0 +1,129 @@
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# Package Files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+### IntelliJ IDEA ###
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+.idea_modules/
+
+### Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache/
+bin/
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+EXE-Builder/*
+
+### VS Code ###
+.vscode/
+
+### System Files ###
+.DS_Store
+Thumbs.db
+
+# Local configuration files
+*.properties
+*.prefs
+
+# Local development files
+*.swp
+*.swo
+*~
+
+# Maven wrapper
+!.mvn/wrapper/maven-wrapper.jar
+
+# Application specific
+*.pdf
+*.signed.pdf
+
+# Logs
+logs/
+*.log
+
+# Temp files
+tmp/
+temp/
+
+# Application specific configuration
+config/application*.{properties,yml}
+
+# Native libraries
+*.dll
+*.so
+*.dylib
+
+# Executable files
+*.exe
+
+# Dependency directories (remove if you check in dependencies)
+lib/
+libs/
+
+# Documentation
+apidocs/
+
+# Test output
+surefire-reports/
+failsafe-reports/
+
+# Build output
+build/
+dist/
+
+# IDE specific files
+.idea/
+*.iml
+.idea_modules/
+
+# Local development environment files
+.env
+.env.local
+
+# Maven wrapper
+.mvn/
+
+# Dependency reduced POM
+dependency-reduced-pom.xml
