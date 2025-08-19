@@ -18,6 +18,7 @@ public class AppConfig {
     @JsonProperty("SOFT_HSM")
     public String softHSM = "";
 
+
     @JsonProperty("TIMESTAMP_SERVER")
     public Map<String, String> timestampServer = new HashMap<>();
 

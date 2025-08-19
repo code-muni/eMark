@@ -22,7 +22,9 @@ public class ConfigManager extends FileUtils {
     private static final ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
     private static final Log log = LogFactory.getLog(ConfigManager.class);
 
-    /** Load config from file or return new empty config */
+    /**
+     * Load config from file or return new empty config
+     */
     public static AppConfig readConfig() {
         File file = new File(CONFIG_FILE);
         if (!file.exists()) {
@@ -31,12 +33,14 @@ public class ConfigManager extends FileUtils {
         try {
             return mapper.readValue(file, AppConfig.class);
         } catch (IOException e) {
-           log.error("Failed to read config file", e);
+            log.error("Failed to read config file", e);
             return new AppConfig();
         }
     }
 
-    /** Save given config to disk */
+    /**
+     * Save given config to disk
+     */
     public static boolean writeConfig(AppConfig config) {
         try {
             ensureDirectory(new File(CONFIG_FILE).getParent());

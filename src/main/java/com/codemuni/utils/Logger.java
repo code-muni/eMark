@@ -81,16 +81,16 @@ public class Logger {
         }
     }
 
+    // Optional: Get current log level
+    public static Level getLevel() {
+        return LOGGER.getLevel();
+    }
+
     // Optional: Set log level dynamically
     public static void setLevel(Level level) {
         LOGGER.setLevel(level);
         for (Handler h : LOGGER.getHandlers()) {
             h.setLevel(level);
         }
-    }
-
-    // Optional: Get current log level
-    public static Level getLevel() {
-        return LOGGER.getLevel();
     }
 }

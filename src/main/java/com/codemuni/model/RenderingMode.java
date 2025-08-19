@@ -12,13 +12,18 @@ public enum RenderingMode {
         this.id = id;
     }
 
-    public String getLabel() { return label; }
-    public String getId() { return id; }
-
     public static RenderingMode fromLabel(String label) {
         for (RenderingMode mode : values()) {
             if (mode.label.equals(label)) return mode;
         }
         return null;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public String getId() {
+        return id;
     }
 }

@@ -6,15 +6,7 @@ import org.bouncycastle.asn1.DERIA5String;
 import org.bouncycastle.asn1.x509.AccessDescription;
 import org.bouncycastle.asn1.x509.AuthorityInformationAccess;
 import org.bouncycastle.asn1.x509.GeneralName;
-import org.bouncycastle.cert.X509CertificateHolder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
-import org.bouncycastle.cert.ocsp.*;
-import org.bouncycastle.ocsp.OCSPReqGenerator;
-import org.bouncycastle.operator.DigestCalculator;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
-import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.PublicKey;
 import java.security.cert.*;
@@ -22,8 +14,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import static sun.misc.IOUtils.readAllBytes;
 
 public class X509CertificateValidatorImpl implements X509CertificateValidator {
 
@@ -100,13 +90,17 @@ public class X509CertificateValidatorImpl implements X509CertificateValidator {
         }
     }
 
-    /** Helper: fetch issuer certificate (should be implemented with a real store) */
+    /**
+     * Helper: fetch issuer certificate (should be implemented with a real store)
+     */
     private X509Certificate getIssuerCertificate(X509Certificate certificate) {
         // TODO: Replace with actual issuer lookup from store or chain
         return null;
     }
 
-    /** Helper: extract OCSP URL from certificate */
+    /**
+     * Helper: extract OCSP URL from certificate
+     */
     private URL getOCSPUrl(X509Certificate cert) {
         try {
             byte[] aiaExt = cert.getExtensionValue("1.3.6.1.5.5.7.1.1"); // Authority Info Access

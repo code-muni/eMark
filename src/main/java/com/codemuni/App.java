@@ -2,7 +2,7 @@ package com.codemuni;
 
 import com.codemuni.config.ConfigManager;
 import com.codemuni.gui.DialogUtils;
-import com.codemuni.gui.PdfViewerMain;
+import com.codemuni.gui.pdfHandler.PdfViewerMain;
 import com.codemuni.utils.FileUtils;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import org.apache.commons.logging.Log;
@@ -14,6 +14,7 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.util.Map;
 
+import static com.codemuni.gui.DialogUtils.resetDialogPreferences;
 import static com.codemuni.utils.AppConstants.LOGO_PATH;
 
 public class App {
@@ -21,7 +22,9 @@ public class App {
     private static final Log log = LogFactory.getLog(App.class);
 
     static {
-        FlatMacDarkLaf.setup(); // Initial theme setup
+        System.setProperty("sun.security.pkcs11.disableNativeDialog", "true");
+        FlatMacDarkLaf.setup();
+        UIManager.put("defaultFont", new Font("SansSerif", Font.PLAIN, 13));
     }
 
     public static Image getAppIcon() {
@@ -31,6 +34,8 @@ public class App {
     public static void main(String[] args) {
         AppInitializer.initialize();      // initialize folders and config
         configureProxyFromConfig();       // read proxy from config
+
+//        resetDialogPreferences();
 
         SwingUtilities.invokeLater(() -> {
             if (!isJava8()) {
@@ -50,17 +55,30 @@ public class App {
 
     private static void showJavaVersionErrorAndExit() {
         String version = System.getProperty("java.version", "unknown");
-        String htmlMessage = "<html><body style='font-family:Segoe UI, sans-serif; font-size:12px; width:350px;'>"
-                + "<h2 style='color:#cc0000; margin:0;'>Unsupported Java Version</h2>"
-                + "<p style='margin-top:10px;'>This application requires <b>Java 8</b> (version <b>1.8.x</b>) to run."
-                + "<br><br>Detected Java version: <span style='color:#007acc;'>" + version + "</span>"
-                + "<br><br>Please install Java 8 and try again.</p>"
-                + "<p style='margin-top:15px; text-align:right;'>Click <b>OK</b> to exit.</p>"
+
+        String htmlMessage = "<html><body style='"
+                + "font-family:Segoe UI, sans-serif;"
+                + "font-size:13px;"
+                + "width:400px;"
+                + "background-color:#2b2b2b;"
+                + "padding:20px;"
+                + "border-radius:10px;"
+                + "color:#e0e0e0;"
+                + "'>"
+                + "<h2 style='color:#ff6b6b; margin:0 0 12px 0; text-align:center; font-size:17px;'>"
+                + "Unsupported Java Version</h2>"
+                + "<p style='margin-top:5px; line-height:1.9;'>"
+                + "This application requires <b>Java 8</b> (version <b>1.8.x</b>) to run."
+                + "<br />Detected Java version: <span style='color:#ffd54f; font-weight:bold;'>" + version + "</span>."
+                + "<br />Please install <b>Java 8</b> and restart the application."
+                + "</p>"
                 + "</body></html>";
 
-        DialogUtils.showHtmlMessage(null, "Unsupported Java Version", htmlMessage, DialogUtils.ERROR_MESSAGE);
+        DialogUtils.showError(null, "Unsupported Java Version", htmlMessage);
         System.exit(1);
     }
+
+
 
     private static void setupUiDefaults() {
         UIManager.put("Button.arc", 10);

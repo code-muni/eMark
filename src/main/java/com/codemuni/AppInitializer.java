@@ -1,10 +1,8 @@
 package com.codemuni;
 
-import com.codemuni.utils.AppConstants;
 import com.codemuni.config.AppConfig;
 import com.codemuni.config.ConfigManager;
-import com.codemuni.utils.FileUtils;
-import com.codemuni.utils.Utils;
+import com.codemuni.utils.AppConstants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -60,16 +58,15 @@ public class AppInitializer {
         timestampDetails.put("password", "");
         defaultConfig.setTimestampServer(timestampDetails);
 
-        
+
         // Set default PKCS11 paths based on OS
         if (AppConstants.isLinux) {
             defaultConfig.pkcs11.add("/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so");
-            defaultConfig.pkcs11.add("/usr/lib64/opensc-pkcs11.so");
-            defaultConfig.softHSM = "/usr/local/lib/softhsm/libsofthsm2.so";
         } else if (AppConstants.isMac) {
             // Common PKCS11 library paths for Mac
-            defaultConfig.pkcs11.add("/usr/local/lib/opensc-pkcs11.so");
-            defaultConfig.softHSM = "/usr/local/lib/softhsm/libsofthsm2.dylib";
+            defaultConfig.pkcs11.add("/Applications/CryptoIDATools.app/Contents/macOS/libcryptoid_pkcs11.dylib");
+            defaultConfig.pkcs11.add("/usr/local/lib/wdProxKeyUsbKeyTool/libwdpkcs_Proxkey.dylib");
+            defaultConfig.pkcs11.add(" /usr/local/lib/libcastle_v2.1.0.0.dylib");
         }
 
         ConfigManager.writeConfig(defaultConfig);

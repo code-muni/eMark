@@ -12,12 +12,14 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.function.Predicate;
 
+import static com.codemuni.gui.GuiConstraints.FIELD_HEIGHT;
+import static com.codemuni.gui.GuiConstraints.INPUT_FIELD_CONFIG;
+
 public class PasswordDialog extends JDialog {
     private final JPasswordField inputField;
     private final JLabel messageLabel;
     private final JButton openDocumentButton;
     private final String defaultMessage;
-    private JPanel inputWrapper;
     private boolean wasClosedByUser = false;
     private boolean confirmed = false;
     private Predicate<String> validator;
@@ -37,21 +39,20 @@ public class PasswordDialog extends JDialog {
 
         this.inputField = new JPasswordField(15);
         this.inputField.setEchoChar('•');
-        this.inputField.putClientProperty(FlatClientProperties.STYLE,
-                "arc:8;" +
-                        "showClearButton:true;" +
-                        "showRevealButton:true;" +
-                        "font:$medium.font");
+        this.inputField.setPreferredSize(new Dimension(200, FIELD_HEIGHT));
+        this.inputField.putClientProperty(FlatClientProperties.STYLE, INPUT_FIELD_CONFIG);
 
         if (placeholder != null) {
             inputField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeholder);
         }
 
         this.messageLabel = new JLabel(message != null ? message : "Please enter your credentials");
+        this.messageLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
         this.defaultMessage = this.messageLabel.getText();
         this.openDocumentButton = new JButton(openText != null ? openText : "Open Document");
 
-        // Autofocus
+        // Autofocus input
         inputField.addHierarchyListener(e -> {
             if ((e.getChangeFlags() & HierarchyEvent.SHOWING_CHANGED) != 0 && inputField.isShowing()) {
                 SwingUtilities.invokeLater(inputField::requestFocusInWindow);
@@ -81,16 +82,25 @@ public class PasswordDialog extends JDialog {
         setContentPane(content);
 
         messageLabel.setFont(UIManager.getFont("Label.font").deriveFont(UIScale.scale(13f)));
-        content.add(messageLabel, BorderLayout.NORTH);
 
-        inputWrapper = new JPanel(new BorderLayout());
-        inputWrapper.setOpaque(false);
-        inputWrapper.setBorder(BorderFactory.createEmptyBorder(
-                UIScale.scale(4), UIScale.scale(4),
-                UIScale.scale(4), UIScale.scale(4)));
-        inputWrapper.add(inputField, BorderLayout.CENTER);
-        content.add(inputWrapper, BorderLayout.CENTER);
+        // ✅ Use GridBagLayout to align message and field
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
 
+        formPanel.add(messageLabel, gbc);
+
+        gbc.gridy++;
+        gbc.insets = new Insets(UIScale.scale(6), 0, 0, 0); // spacing between label and input
+        formPanel.add(inputField, gbc);
+
+        content.add(formPanel, BorderLayout.CENTER);
+
+        // Buttons
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setOpaque(false);
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.X_AXIS));
@@ -107,12 +117,11 @@ public class PasswordDialog extends JDialog {
 
         getRootPane().setDefaultButton(openDocumentButton);
 
-        // Input change listener — reset outline & button, keep error text
+        // Input listener
         inputField.getDocument().addDocumentListener(new DocumentListener() {
             private void update() {
                 String value = getValue().trim();
 
-                // Always reset the red outline if user starts typing
                 if (hasErrorMessage) {
                     inputField.putClientProperty(FlatClientProperties.OUTLINE, null);
                 }
@@ -120,7 +129,6 @@ public class PasswordDialog extends JDialog {
                 boolean isValid = !value.isEmpty() && (validator == null || validator.test(value));
                 openDocumentButton.setEnabled(isValid);
 
-                // Restore default button behavior after error
                 getRootPane().setDefaultButton(openDocumentButton);
             }
 
@@ -137,7 +145,7 @@ public class PasswordDialog extends JDialog {
             }
         });
 
-        // Open action
+        // Authenticate action
         openDocumentButton.addActionListener(e -> {
             String value = getValue();
             if (validator != null && !validator.test(value)) {
@@ -208,21 +216,21 @@ public class PasswordDialog extends JDialog {
         shakeTimer = new Timer(16, ev -> {
             int t = (int) ((System.currentTimeMillis() - start) / 16);
             int offset = (int) (Math.sin(t * 0.6) * UIScale.scale(3));
-            inputWrapper.setBorder(BorderFactory.createEmptyBorder(
+            inputField.setBorder(BorderFactory.createEmptyBorder(
                     UIScale.scale(4), UIScale.scale(4 + offset),
                     UIScale.scale(4), UIScale.scale(4 - offset)));
-            inputWrapper.revalidate();
-            inputWrapper.repaint();
+            inputField.revalidate();
+            inputField.repaint();
         });
         shakeTimer.start();
 
         stopTimer = new Timer(300, ev -> {
             shakeTimer.stop();
-            inputWrapper.setBorder(BorderFactory.createEmptyBorder(
+            inputField.setBorder(BorderFactory.createEmptyBorder(
                     UIScale.scale(4), UIScale.scale(4),
                     UIScale.scale(4), UIScale.scale(4)));
-            inputWrapper.revalidate();
-            inputWrapper.repaint();
+            inputField.revalidate();
+            inputField.repaint();
         });
         stopTimer.setRepeats(false);
         stopTimer.start();

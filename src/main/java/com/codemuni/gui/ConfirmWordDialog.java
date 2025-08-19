@@ -1,5 +1,6 @@
 package com.codemuni.gui;
 
+import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 
 import javax.swing.*;
@@ -8,9 +9,11 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 
+import static com.codemuni.gui.GuiConstraints.INPUT_FIELD_CONFIG;
+
 public class ConfirmWordDialog extends JDialog {
-    private boolean confirmed = false;
     private final JButton confirmButton;
+    private boolean confirmed = false;
 
     public ConfirmWordDialog(Frame parent, String requiredWord) {
         super(parent, "Confirmation Required", true);
@@ -37,6 +40,7 @@ public class ConfirmWordDialog extends JDialog {
         JTextField inputField = new JTextField();
         inputField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         inputField.putClientProperty("JTextField.placeholderText", requiredWord);
+        inputField.putClientProperty(FlatClientProperties.STYLE, INPUT_FIELD_CONFIG);
         inputField.setAlignmentX(Component.LEFT_ALIGNMENT);
         content.add(inputField);
 
@@ -85,17 +89,6 @@ public class ConfirmWordDialog extends JDialog {
         cancelButton.addActionListener(e -> dispose());
     }
 
-    public boolean isConfirmed() {
-        return confirmed;
-    }
-
-    private abstract static class SimpleDocumentListener implements DocumentListener {
-        public abstract void update();
-        public void insertUpdate(DocumentEvent e) { update(); }
-        public void removeUpdate(DocumentEvent e) { update(); }
-        public void changedUpdate(DocumentEvent e) { update(); }
-    }
-
     // Demo main
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -107,5 +100,25 @@ public class ConfirmWordDialog extends JDialog {
             JOptionPane.showMessageDialog(null,
                     dialog.isConfirmed() ? "Confirmed ✅" : "Cancelled ❌");
         });
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+
+    private abstract static class SimpleDocumentListener implements DocumentListener {
+        public abstract void update();
+
+        public void insertUpdate(DocumentEvent e) {
+            update();
+        }
+
+        public void removeUpdate(DocumentEvent e) {
+            update();
+        }
+
+        public void changedUpdate(DocumentEvent e) {
+            update();
+        }
     }
 }

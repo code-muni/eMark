@@ -4,18 +4,21 @@ import com.codemuni.App;
 import com.codemuni.config.ConfigManager;
 import com.codemuni.core.keyStoresProvider.*;
 import com.codemuni.core.signer.AppearanceOptions;
+import com.codemuni.exceptions.CertificateNotFoundException;
 import com.codemuni.exceptions.IncorrectPINException;
-import com.codemuni.exceptions.MaxPinAttemptsExceededException;
+import com.codemuni.exceptions.UserCancelledOperationException;
 import com.codemuni.exceptions.UserCancelledPasswordEntryException;
 import com.codemuni.gui.CertificateListDialog;
-import com.codemuni.gui.PdfViewerMain;
 import com.codemuni.gui.SignatureAppearanceDialog;
-import com.codemuni.gui.TokenPinCallbackHandler;
+import com.codemuni.gui.SmartCardCallbackHandler;
+import com.codemuni.gui.pdfHandler.PdfViewerMain;
 import com.codemuni.model.KeystoreAndCertificateInfo;
 import com.codemuni.service.PdfSignerService;
 import com.codemuni.utils.AppConstants;
 import com.itextpdf.text.BadElementException;
 import com.itextpdf.text.Image;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.security.auth.callback.UnsupportedCallbackException;
 import java.io.File;
@@ -34,7 +37,8 @@ import java.util.stream.Collectors;
 
 public class SignerController {
     private static final Logger LOGGER = Logger.getLogger(SignerController.class.getName());
-    private final PKCS11KeyStoreProvider pkcs11KeyStoreProvider = new PKCS11KeyStoreProvider(ConfigManager.getPKCS11Paths());
+    private static final Log log = LogFactory.getLog(SignerController.class);
+    private final PKCS11KeyStoreProvider pkcs11KeyStoreProvider = new PKCS11KeyStoreProvider();
     private final PdfSignerService signerService = new PdfSignerService();
     private File selectedFile;
     private String pdfPassword;
@@ -69,11 +73,11 @@ public class SignerController {
      * Starts the signing service by prompting the user to select a certificate and signing the PDF.
      * Execution stops gracefully if the user cancels at any stage.
      */
-    public void startSigningService() throws KeyStoreException, IOException, CertificateException, UnsupportedCallbackException, NoSuchAlgorithmException, IncorrectPINException, MaxPinAttemptsExceededException {
+    public void startSigningService() throws KeyStoreException, IOException, CertificateException, CertificateNotFoundException, UnsupportedCallbackException, NoSuchAlgorithmException, IncorrectPINException {
         loadValidCertificates();
 
         if (keystoreAndCertificateInfos.isEmpty()) {
-            LOGGER.log(Level.WARNING, "No valid certificates found. Signing cancelled.");
+            log.error("No valid certificates were found in the keystore. Prompting user to select a PFX certificate.");
         }
 
         CertificateListDialog certDialog = new CertificateListDialog(PdfViewerMain.INSTANCE, keystoreAndCertificateInfos);
@@ -82,8 +86,7 @@ public class SignerController {
         keystoreAndCertificateInfo = certDialog.getSelectedKeystoreInfo();
 
         if (keystoreAndCertificateInfo == null) {
-            LOGGER.log(Level.INFO, "User cancelled certificate selection.");
-            return; // Stop gracefully
+            throw new UserCancelledOperationException("User cancelled certificate selection");
         }
 
         X509Certificate x509Certificate = loadSelectedCertificate();
@@ -92,9 +95,10 @@ public class SignerController {
             return;
         }
 
+
         SignatureAppearanceDialog appearanceDialog = new SignatureAppearanceDialog(PdfViewerMain.INSTANCE);
         appearanceDialog.setCertificate(x509Certificate);
-        appearanceDialog.showCertificateList();
+        appearanceDialog.showAppearanceConfigPrompt();
 
         AppearanceOptions appearanceOptions = appearanceDialog.getAppearanceOptions();
         if (appearanceOptions == null) return;
@@ -117,8 +121,6 @@ public class SignerController {
         KeyStoreProvider provider = createProvider();
         signerService.setProvider(provider);
         signerService.launchSigningFlow(appearanceOptions);
-
-
     }
 
     /**
@@ -153,6 +155,7 @@ public class SignerController {
         }
 
         if (Boolean.TRUE.equals(activeStores.get(AppConstants.PKCS11_KEY_STORE))) {
+            pkcs11KeyStoreProvider.setPkcs11LibPathsToBeLoadPublicKey(ConfigManager.getPKCS11Paths());
             providers.add(pkcs11KeyStoreProvider);
         }
 
@@ -177,9 +180,7 @@ public class SignerController {
     /**
      * Creates appropriate KeyStoreProvider based on selected certificate info.
      */
-    private KeyStoreProvider createProvider()
-            throws IncorrectPINException, CertificateException,
-            KeyStoreException, IOException, UnsupportedCallbackException, NoSuchAlgorithmException, MaxPinAttemptsExceededException {
+    private KeyStoreProvider createProvider() throws KeyStoreException, IOException {
 
         String keystoreName = keystoreAndCertificateInfo.getKeystoreName();
         KeyStoreProvider provider;
@@ -197,9 +198,8 @@ public class SignerController {
                 pkcs11KeyStoreProvider.setTokenSerialNumber(keystoreAndCertificateInfo.getTokenSerial());
                 pkcs11KeyStoreProvider.setPkcs11LibPath(keystoreAndCertificateInfo.getPkcs11Path());
                 pkcs11KeyStoreProvider.setCertificateSerialNumber(keystoreAndCertificateInfo.getCertificateSerial());
-                pkcs11KeyStoreProvider.loadKeyStore(new TokenPinCallbackHandler("Enter token PIN"));
+                pkcs11KeyStoreProvider.loadKeyStore(new SmartCardCallbackHandler());
                 provider = pkcs11KeyStoreProvider;
-
                 break;
             }
 

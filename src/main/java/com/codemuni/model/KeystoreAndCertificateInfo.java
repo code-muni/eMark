@@ -4,11 +4,11 @@ import java.security.cert.X509Certificate;
 import java.util.Objects;
 
 public class KeystoreAndCertificateInfo {
-    private X509Certificate certificate;
     private final String keystoreName;
     private final String tokenSerial;
     private final String pkcs11Path;
     private final String pfxFilePath;
+    private X509Certificate certificate;
 
     // Constructor for PKCS11 and Windows keystores
     public KeystoreAndCertificateInfo(X509Certificate certificate, String keystoreName, String tokenSerial, String pkcs11Path) {

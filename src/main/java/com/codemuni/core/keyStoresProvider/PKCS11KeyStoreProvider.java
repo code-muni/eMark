@@ -1,24 +1,22 @@
 package com.codemuni.core.keyStoresProvider;
 
 import com.codemuni.exceptions.*;
-import com.codemuni.gui.TokenPinCallbackHandler;
+import com.codemuni.gui.SmartCardCallbackHandler;
 import com.codemuni.model.KeystoreAndCertificateInfo;
 import com.codemuni.utils.AppConstants;
+import com.codemuni.utils.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import sun.security.pkcs11.SunPKCS11;
 import sun.security.pkcs11.wrapper.*;
 
-import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.*;
@@ -34,10 +32,8 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
 
     private static final String PKCS11_TYPE = "PKCS11";
     private static final Provider BC_PROVIDER = new BouncyCastleProvider();
-
-    private final List<String> pkcs11LibPathsToBeLoadPublicKey;
     private final Map<String, String> serialToAlias = new ConcurrentHashMap<>();
-
+    private List<String> pkcs11LibPathsToBeLoadPublicKey;
     private volatile SunPKCS11 sunPKCS11Provider;
     private volatile KeyStore keyStore;
 
@@ -45,13 +41,14 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
     private String tokenSerialNumber;       // token info serial string
     private String pkcs11LibPath;           // PKCS#11 library path
 
-    private boolean loggedIn = false; // NEW: Track session state
+//    private boolean loggedIn = false; // NEW: Track session state
 
     public PKCS11KeyStoreProvider(List<String> pkcs11LibPaths) {
         this.pkcs11LibPathsToBeLoadPublicKey = Objects.requireNonNull(pkcs11LibPaths);
     }
 
-    // -------------------- Internal Helpers --------------------
+    public PKCS11KeyStoreProvider() {
+    }
 
     private static long findSlotByTokenSerial(String libPath, String desiredSerial)
             throws IncorrectPINException, TokenOrHsmNotFoundException, KeyStoreInitializationException {
@@ -72,6 +69,8 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
             throw new KeyStoreInitializationException("Unable to load PKCS#11 library from path: " + libPath, e);
         }
     }
+
+    // -------------------- Internal Helpers --------------------
 
     private static PKCS11OperationException translatePKCS11Error(PKCS11Exception e) throws IncorrectPINException {
         int code = (int) e.getErrorCode();
@@ -98,14 +97,14 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
         passwordCallback.clearPassword();
     }
 
-    // -------------------- Public API --------------------
-
     // Add these helpers anywhere in the class (e.g., near other helpers)
     private static Throwable rootCause(Throwable t) {
         Throwable cur = t, next;
         while (cur != null && (next = cur.getCause()) != null && next != cur) cur = next;
         return cur;
     }
+
+    // -------------------- Public API --------------------
 
     private static PKCS11Exception findPkcs11Cause(Throwable t) {
         while (t != null) {
@@ -123,6 +122,10 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
     private static boolean isPinLocked(Throwable t) {
         PKCS11Exception ex = findPkcs11Cause(t);
         return ex != null && ex.getErrorCode() == PKCS11Constants.CKR_PIN_LOCKED;
+    }
+
+    public void setPkcs11LibPathsToBeLoadPublicKey(List<String> pkcs11LibPathsToBeLoadPublicKey) {
+        this.pkcs11LibPathsToBeLoadPublicKey = pkcs11LibPathsToBeLoadPublicKey;
     }
 
     @Override
@@ -145,6 +148,13 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
      */
     private void enumerateLibraryCertificates(String libPath, java.util.function.Consumer<KeystoreAndCertificateInfo> consumer)
             throws Exception {
+
+        if (!FileUtils.isFileExist(libPath)) {
+            System.err.println("[WARN] PKCS#11 library not found at: " + libPath + " — skipping.");
+            return;
+        }
+
+
         PKCS11 pkcs11 = PKCS11.getInstance(libPath, "C_GetFunctionList", null, false);
         CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
 
@@ -194,14 +204,11 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
         this.tokenSerialNumber = tokenSerialNumber;
     }
 
-    /**
-     * Explicit login method — prompts for PIN with up to 3 retries on CKR_PIN_INCORRECT.
-     */
-    public synchronized void login(TokenPinCallbackHandler pinHandler)
-            throws IncorrectPINException, KeyStoreException, IOException,
-            UnsupportedCallbackException, CertificateException, NoSuchAlgorithmException {
 
-        if (loggedIn && keyStore != null) {
+    public synchronized void login(SmartCardCallbackHandler pinHandler)
+            throws IncorrectPINException, KeyStoreException, UserCancelledPasswordEntryException {
+
+        if (keyStore != null) {
             LOG.info("Already logged in — reusing existing session.");
             return;
         }
@@ -215,83 +222,101 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
             Security.addProvider(BC_PROVIDER);
         }
 
-        final int maxRetries = 3;
+        cleanupProvider();
 
-        for (int attempt = 1; true; attempt++) {
-            // Ensure any previous provider is removed before a fresh attempt
-            if (sunPKCS11Provider != null) {
-                try {
-                    Security.removeProvider(sunPKCS11Provider.getName());
-                } catch (Exception ignore) {
-                }
-                sunPKCS11Provider = null;
-            }
+        String config = String.format(Locale.ROOT,
+                "name=PKCS11-%d\nlibrary=%s\nslot=%d", slot, pkcs11LibPath, slot);
 
-            String config = String.format(Locale.ROOT,
-                    "name=PKCS11-%d\nlibrary=%s\nslot=%d", slot, pkcs11LibPath, slot);
-            sunPKCS11Provider = new SunPKCS11(new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8)));
-            Security.addProvider(sunPKCS11Provider);
+        sunPKCS11Provider = new SunPKCS11(new ByteArrayInputStream(config.getBytes(StandardCharsets.UTF_8)));
+        Security.addProvider(sunPKCS11Provider);
 
-            KeyStore ks = KeyStore.getInstance(PKCS11_TYPE, sunPKCS11Provider);
+        try {
+            KeyStore.Builder builder = KeyStore.Builder.newInstance(
+                    "PKCS11", null, new KeyStore.CallbackHandlerProtection(pinHandler));
+            this.keyStore = builder.getKeyStore();
+            LOG.info("Login successful — session will remain active until logout() or reset().");
+        } catch (KeyStoreException e) {
+            handleLoginException(e);
+        }
+    }
 
-            PasswordCallback passwordCallback = new PasswordCallback("Enter PIN:", true);
-            pinHandler.handle(new Callback[]{passwordCallback});
+    private void handleLoginException(KeyStoreException e)
+            throws IncorrectPINException, UserCancelledPasswordEntryException, KeyStoreException {
 
-            if (pinHandler.isCancelled()) {
-                clearPassword(passwordCallback);
-                throw new UserCancelledPasswordEntryException("User cancelled PIN entry.");
-            }
-
-            try {
-                ks.load(null, passwordCallback.getPassword()); // <-- may throw on wrong PIN
-                clearPassword(passwordCallback);
-
-                this.keyStore = ks;
-                this.loggedIn = true;
-                LOG.info("Login successful — session will remain active until logout() or reset().");
-                return;
-
-            } catch (IOException e) {
-                // Always clear sensitive data
-                clearPassword(passwordCallback);
-
-                // Detect exact PKCS#11 reason by walking the cause chain
-                if (isPinLocked(e)) {
-                    PKCS11Exception pe = findPkcs11Cause(e);
-                    LOG.error("PIN is locked on token. No more attempts.");
-                    throw new IncorrectPINException("PIN is locked on the token. Please unblock/reset the PIN.", pe);
-                }
-
-                if (isIncorrectPin(e)) {
-                    int left = maxRetries - attempt;
-                    LOG.warn(String.format("Incorrect PIN. Attempt %d of %d", attempt, maxRetries));
-                    if (left == 0) {
-                        PKCS11Exception pe = findPkcs11Cause(e);
-                        throw new IncorrectPINException("Signing aborted — PIN retry limit exceeded.", pe);
+        Throwable cause = e.getCause();
+        while (cause != null) {
+            if (cause instanceof javax.security.auth.login.FailedLoginException) {
+                Throwable rootCause = cause.getCause();
+                if (rootCause instanceof sun.security.pkcs11.wrapper.PKCS11Exception) {
+                    String msg = rootCause.getMessage();
+                    if (msg.contains("CKR_PIN_INCORRECT")) {
+                        throw new IncorrectPINException("The provided PIN is incorrect.", e);
                     }
-                    // Optional: update the next prompt's label so the user sees remaining tries
-                    try {
-                        pinHandler.setLabelText("<html><span style='color:red;'>Incorrect PIN. Try again (<b>" + left + "</b> left)</span></html>");
-                    } catch (Exception ignore) { /* handler may not support it, safe to ignore */ }
-
-                    // Loop continues: provider will be recreated on next iteration
-                    continue;
+                    if (msg.contains("CKR_CANCEL")) {
+                        throw new UserCancelledPasswordEntryException("PIN entry was cancelled by the user.", e);
+                    }
                 }
+            }
+            if (cause instanceof sun.security.pkcs11.wrapper.PKCS11Exception &&
+                    cause.getMessage().contains("CKR_CANCEL")) {
+                throw new UserCancelledPasswordEntryException("PIN entry was cancelled by the user.", e);
+            }
+            cause = cause.getCause();
+        }
+        throw e; // Unhandled — rethrow
+    }
 
-                // Not a wrong-PIN scenario → rethrow (device removed, token absent, etc.)
-                throw e;
+    private void cleanupProvider() {
+        if (sunPKCS11Provider != null) {
+            try {
+                Security.removeProvider(sunPKCS11Provider.getName());
+                LOG.debug("Removed previous PKCS#11 provider: " + sunPKCS11Provider.getName());
+            } catch (Exception e) {
+                LOG.warn("Failed to remove PKCS#11 provider: " + e.getMessage(), e);
+            } finally {
+                sunPKCS11Provider = null;
             }
         }
     }
 
-    /**
-     * Backward compatibility — behaves like login().
-     */
-    public synchronized void loadKeyStore(TokenPinCallbackHandler pinHandler)
-            throws IncorrectPINException, KeyStoreException, IOException,
-            UnsupportedCallbackException, CertificateException, NoSuchAlgorithmException {
-        login(pinHandler);
+    public synchronized KeyStore loadKeyStore(SmartCardCallbackHandler handler)
+            throws KeyStoreException, UserCancelledPasswordEntryException {
+
+        int attempts = 0;
+        final int MAX_ATTEMPTS = 3;
+
+        while (true) {
+            try {
+                login(handler);
+                return this.keyStore; // success
+            } catch (IncorrectPINException e) {
+                attempts++;
+                LOG.warn("Incorrect PIN entered (attempt " + attempts + "/" + MAX_ATTEMPTS + ").");
+
+                // If user already cancelled in the handler, stop immediately
+                if (handler.isCancelled()) {
+                    throw new UserCancelledPasswordEntryException("PIN entry was cancelled by the user.", e);
+                }
+
+                if (attempts >= MAX_ATTEMPTS) {
+                    throw new MaxPinAttemptsExceededException("Maximum PIN attempts reached", e);
+                }
+
+                // Update dialog status instead of creating new handler
+                String message = String.format(
+                        "<html><body><p style='color:red'>Authentication failed. (%d of %d left)</p></body></html>",
+                        (MAX_ATTEMPTS - attempts),
+                        MAX_ATTEMPTS
+                );
+                handler.setStatusMessage(message);
+
+            } catch (UserCancelledPasswordEntryException e) {
+                LOG.info("User cancelled PIN entry.");
+                throw e; // don’t retry — user explicitly cancelled
+            }
+        }
     }
+
 
     /**
      * Explicit logout — closes session and clears sensitive data.
@@ -305,7 +330,6 @@ public final class PKCS11KeyStoreProvider implements KeyStoreProvider {
         } catch (Exception ignored) {
         }
         keyStore = null;
-        loggedIn = false;
         sunPKCS11Provider = null;
         serialToAlias.clear();
         LOG.info("Logged out from token — session closed.");

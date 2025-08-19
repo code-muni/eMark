@@ -54,7 +54,7 @@ public class SignatureAppearanceDialog extends JDialog {
         this.certificate = certificate;
     }
 
-    public void showCertificateList() {
+    public void showAppearanceConfigPrompt() {
         JPanel mainPanel = new JPanel(new BorderLayout(15, 10));
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
 

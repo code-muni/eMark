@@ -33,12 +33,10 @@ public class Utils {
         }
     }
 
-    public static String generateTitle(String appName, String fullFilePath, int maxLength) {
+    public static String truncateText(String appName, String fullFilePath, int maxLength) {
         if (fullFilePath == null || fullFilePath.isEmpty()) {
             return appName;
         }
-
-        String fileName = new java.io.File(fullFilePath).getName();
         String path = fullFilePath;
 
         if (fullFilePath.length() > maxLength) {

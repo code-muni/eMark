@@ -10,7 +10,7 @@ import com.codemuni.exceptions.SigningProcessException;
 import com.codemuni.exceptions.TSAConfigurationException;
 import com.codemuni.exceptions.UserCancelledPasswordEntryException;
 import com.codemuni.gui.DialogUtils;
-import com.codemuni.gui.PdfViewerMain;
+import com.codemuni.gui.pdfHandler.PdfViewerMain;
 import com.itextpdf.text.pdf.PdfReader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,10 +34,22 @@ public class PdfSignerService {
     public PdfSignerService() {
     }
 
+    private static Timer reRenderSignedPdfTimer(File saveFile) {
+        Timer timer = new Timer(1000, evt -> {
+            SwingUtilities.invokeLater(() -> {
+                PdfViewerMain.INSTANCE.renderPdfFromPath(saveFile.getAbsolutePath());
+                PdfViewerMain.INSTANCE.setWindowTitle(saveFile.getAbsolutePath());
+                PdfViewerMain.INSTANCE.requestFocusInWindow();
+                PdfViewerMain.INSTANCE.repaint();
+            });
+        });
+        timer.setRepeats(false);
+        return timer;
+    }
+
     public void setProvider(KeyStoreProvider provider) {
         this.provider = provider;
     }
-
 
     public void setPdfPassword(String pdfPassword) {
         this.pdfPassword = pdfPassword;
@@ -96,19 +108,6 @@ public class PdfSignerService {
         }
     }
 
-    private static Timer reRenderSignedPdfTimer(File saveFile) {
-        Timer timer = new Timer(1000, evt -> {
-            SwingUtilities.invokeLater(() -> {
-                PdfViewerMain.INSTANCE.renderPdfFromPath(saveFile.getAbsolutePath());
-                PdfViewerMain.INSTANCE.setWindowTitle(saveFile.getAbsolutePath());
-                PdfViewerMain.INSTANCE.requestFocusInWindow();
-                PdfViewerMain.INSTANCE.repaint();
-            });
-        });
-        timer.setRepeats(false);
-        return timer;
-    }
-
     private void handleSigningException(Exception e, KeyStoreProvider provider) {
         if (provider instanceof PKCS11KeyStoreProvider) {
             ((PKCS11KeyStoreProvider) provider).reset();
@@ -127,16 +126,15 @@ public class PdfSignerService {
                     + "Please check your timestamp server settings and try again."
                     + "</div></body></html>";
 
-            DialogUtils.showHtmlMessage(
+            DialogUtils.showError(
                     PdfViewerMain.INSTANCE,
                     "Timestamp Error",
-                    htmlMessage,
-                    DialogUtils.ERROR_MESSAGE
+                    htmlMessage
             );
             return;
         }
 
-        DialogUtils.showExceptionWithDetails(
+        DialogUtils.showExceptionDialog(
                 PdfViewerMain.INSTANCE,
                 e instanceof SigningProcessException ? "Error while signing PDF" : "Unexpected Error Occurred",
                 e

@@ -20,11 +20,9 @@ public class SecuritySettingsPanel extends JPanel {
 
     private JTextField timestampField, tsaUsernameField, hostField, portField, usernameField;
     private JPasswordField tsaPasswordField, passwordField;
-    private JButton timestampSaveButton, proxySaveButton;
 
     public SecuritySettingsPanel() {
         setLayout(new GridBagLayout());
-        setBackground(new Color(28, 28, 28));
         GridBagConstraints gbc = new GridBagConstraints();
 
         JPanel leftPanel = createLeftPanel();
@@ -40,6 +38,26 @@ public class SecuritySettingsPanel extends JPanel {
         add(leftPanel, gbc);
 
         loadSavedConfig();
+    }
+
+    private static JButton getToggleButton(JPasswordField passwordField, ImageIcon closedEyeIcon, ImageIcon openEyeIcon) {
+        JButton toggle = new JButton(closedEyeIcon);
+        toggle.setPreferredSize(new Dimension(36, FIELD_HEIGHT));
+        toggle.setFocusPainted(false);
+        toggle.setOpaque(false);
+
+        toggle.addActionListener(e -> {
+            if (passwordField.getEchoChar() == 0) {
+                // Currently visible → hide it
+                passwordField.setEchoChar('•');
+                toggle.setIcon(closedEyeIcon);
+            } else {
+                // Currently hidden → show it
+                passwordField.setEchoChar((char) 0);
+                toggle.setIcon(openEyeIcon);
+            }
+        });
+        return toggle;
     }
 
     private JPanel createLeftPanel() {
@@ -60,7 +78,6 @@ public class SecuritySettingsPanel extends JPanel {
 
         return panel;
     }
-
 
     private JPanel createTimestampSection() {
         JPanel wrapper = createTitledPanel("Timestamp Server");
@@ -89,7 +106,7 @@ public class SecuritySettingsPanel extends JPanel {
         gbc.gridx = 1;
         wrapper.add(passwordWrapper, gbc);
 
-        timestampSaveButton = createButton("Save", new Dimension(150, FIELD_HEIGHT));
+        JButton timestampSaveButton = createButton("Save", new Dimension(150, FIELD_HEIGHT));
         timestampSaveButton.addActionListener(e -> saveTimestampConfig());
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setOpaque(false);
@@ -133,7 +150,7 @@ public class SecuritySettingsPanel extends JPanel {
         gbc.gridx = 1;
         wrapper.add(passwordWrapper, gbc);
 
-        proxySaveButton = createButton("Save", new Dimension(150, FIELD_HEIGHT));
+        JButton proxySaveButton = createButton("Save", new Dimension(150, FIELD_HEIGHT));
         proxySaveButton.addActionListener(e -> saveProxyConfig());
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.setOpaque(false);
@@ -151,7 +168,6 @@ public class SecuritySettingsPanel extends JPanel {
         JTextField field = new JTextField();
         field.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, placeholder);
         field.setForeground(Color.LIGHT_GRAY);
-        field.setBackground(DARK_BG);
         field.setCaretColor(Color.WHITE);
         field.setToolTipText(tooltip);
         field.setPreferredSize(new Dimension(Short.MAX_VALUE, FIELD_HEIGHT));
@@ -165,7 +181,6 @@ public class SecuritySettingsPanel extends JPanel {
         JPasswordField field = new JPasswordField();
         field.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, tooltip);
         field.setForeground(Color.LIGHT_GRAY);
-        field.setBackground(DARK_BG);
         field.setCaretColor(Color.WHITE);
         field.setPreferredSize(new Dimension(Short.MAX_VALUE, FIELD_HEIGHT));
         field.setBorder(BorderFactory.createCompoundBorder(
@@ -179,24 +194,7 @@ public class SecuritySettingsPanel extends JPanel {
         ImageIcon closedEyeIcon = Utils.loadScaledIcon("/icons/eye_closed.png", 20);
         ImageIcon openEyeIcon = Utils.loadScaledIcon("/icons/eye_open.png", 20);
 
-        JButton toggle = new JButton(closedEyeIcon);
-        toggle.setPreferredSize(new Dimension(36, FIELD_HEIGHT));
-        toggle.setFocusPainted(false);
-        toggle.setContentAreaFilled(false); // Transparent background
-        toggle.setBorderPainted(false);
-        toggle.setOpaque(false);
-
-        toggle.addActionListener(e -> {
-            if (passwordField.getEchoChar() == 0) {
-                // Currently visible → hide it
-                passwordField.setEchoChar('•');
-                toggle.setIcon(closedEyeIcon);
-            } else {
-                // Currently hidden → show it
-                passwordField.setEchoChar((char) 0);
-                toggle.setIcon(openEyeIcon);
-            }
-        });
+        JButton toggle = getToggleButton(passwordField, closedEyeIcon, openEyeIcon);
 
         JPanel panel = new JPanel(new BorderLayout(5, 0));
         panel.setOpaque(false);
@@ -204,7 +202,6 @@ public class SecuritySettingsPanel extends JPanel {
         panel.add(toggle, BorderLayout.EAST);
         return panel;
     }
-
 
     private JPanel createLabeledField(String labelText, JComponent field) {
         JPanel panel = new JPanel();
@@ -225,15 +222,13 @@ public class SecuritySettingsPanel extends JPanel {
     private JButton createButton(String text, Dimension size) {
         JButton button = new JButton(text);
         button.setPreferredSize(size);
-        button.setBackground(DARK_BG);
-        button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
         button.setBorder(new EmptyBorder(5, 10, 5, 10));
         button.setOpaque(true); // Make sure background is visible
 
         // Hover effect colors
-        Color hoverColor = new Color(60, 90, 140);  // Slight bluish tone
-        Color normalColor = DARK_BG;
+        Color hoverColor = new Color(60, 90, 140);
+        Color defaultBg = button.getBackground();
 
         // Add hover listener
         button.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -244,7 +239,7 @@ public class SecuritySettingsPanel extends JPanel {
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent e) {
-                button.setBackground(normalColor);
+                button.setBackground(defaultBg);
             }
         });
 
@@ -256,7 +251,7 @@ public class SecuritySettingsPanel extends JPanel {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
         panel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(new Color(70, 70, 70)),
+                BorderFactory.createLineBorder(new Color(100, 100, 100)),
                 title,
                 TitledBorder.LEFT,
                 TitledBorder.TOP,

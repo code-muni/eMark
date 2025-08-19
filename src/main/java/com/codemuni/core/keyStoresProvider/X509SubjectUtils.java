@@ -45,7 +45,6 @@ public final class X509SubjectUtils {
     }
 
 
-
     // Subject DN fields
     public static String getCommonName(X509Certificate cert) {
         return getSubjectMap(cert).get("CN");

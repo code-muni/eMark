@@ -4,6 +4,7 @@ import com.codemuni.config.ConfigManager;
 import com.codemuni.gui.ConfirmWordDialog;
 import com.codemuni.gui.DialogUtils;
 import com.codemuni.utils.AppConstants;
+import com.codemuni.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -20,7 +21,6 @@ import java.util.function.Consumer;
 public class KeystoreSettingsPanel extends JPanel {
     private static final int PATH_PANEL_HEIGHT = 40;
     private static final int PATH_FIELD_WIDTH = 220;
-    private static final Color DARK_BACKGROUND = new Color(40, 40, 40);
     private static final Color BORDER_COLOR = new Color(100, 100, 100);
     private static final Color REMOVE_BUTTON_COLOR = new Color(198, 25, 25, 69);
 
@@ -90,7 +90,7 @@ public class KeystoreSettingsPanel extends JPanel {
     private JPanel createPKCS11PathPanel() {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createLineBorder(Color.DARK_GRAY),
+                BorderFactory.createLineBorder(BORDER_COLOR),
                 "PKCS#11 Path Management",
                 TitledBorder.LEFT,
                 TitledBorder.TOP,
@@ -193,12 +193,11 @@ public class KeystoreSettingsPanel extends JPanel {
         JPanel pathPanel = new JPanel(new BorderLayout());
         pathPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, PATH_PANEL_HEIGHT));
         pathPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER_COLOR, 1, true),
+                BorderFactory.createLineBorder(new Color(81, 81, 81), 1, true),
                 new EmptyBorder(8, 8, 4, 8)));
         pathPanel.setOpaque(true);
-        pathPanel.setBackground(DARK_BACKGROUND);
 
-        JTextField pathField = new JTextField(path);
+        JTextField pathField = new JTextField(Utils.truncateText("", path, 40));
         pathField.setPreferredSize(new Dimension(PATH_FIELD_WIDTH, PATH_PANEL_HEIGHT - 10));
         pathField.setEditable(false);
         pathField.setOpaque(false);

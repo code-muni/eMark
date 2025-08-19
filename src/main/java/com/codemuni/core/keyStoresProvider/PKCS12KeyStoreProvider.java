@@ -5,8 +5,10 @@ import com.codemuni.exceptions.KeyStoreInitializationException;
 import com.codemuni.exceptions.PrivateKeyAccessException;
 import com.codemuni.exceptions.UserCancelledPasswordEntryException;
 import com.codemuni.gui.PasswordDialog;
-import com.codemuni.gui.PdfViewerMain;
+import com.codemuni.gui.pdfHandler.PdfViewerMain;
 import com.codemuni.model.KeystoreAndCertificateInfo;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import java.io.FileInputStream;
@@ -22,6 +24,7 @@ public class PKCS12KeyStoreProvider implements KeyStoreProvider {
 
     // Retry config
     private static final int MAX_PIN_ATTEMPTS = 3;
+    private static final Log log = LogFactory.getLog(PKCS12KeyStoreProvider.class);
     private final String pfxFilePath;
     private final Provider provider = new BouncyCastleProvider();
     // Session-level cached data
@@ -40,7 +43,7 @@ public class PKCS12KeyStoreProvider implements KeyStoreProvider {
         List<KeystoreAndCertificateInfo> certList = new ArrayList<>();
         try {
             loadKeyStore();
-            String alias = getFirstAlias();
+            String alias = getSigningAlias();
 
             Certificate cert = keyStore.getCertificate(alias);
             if (cert instanceof X509Certificate) {
@@ -75,7 +78,7 @@ public class PKCS12KeyStoreProvider implements KeyStoreProvider {
             cachedPassword = null;
             keyStore = null;
 
-            if(e instanceof UserCancelledPasswordEntryException) {
+            if (e instanceof UserCancelledPasswordEntryException) {
                 throw (UserCancelledPasswordEntryException) e;
             }
 
@@ -145,13 +148,17 @@ public class PKCS12KeyStoreProvider implements KeyStoreProvider {
         }
     }
 
-    private String getFirstAlias() throws KeyStoreException {
+    private String getSigningAlias() throws KeyStoreException {
         Enumeration<String> aliases = keyStore.aliases();
-        if (!aliases.hasMoreElements()) {
-            throw new KeyStoreException("No aliases found in keystore.");
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+            if (keyStore.isKeyEntry(alias)) {
+                return alias; // Found alias with private key
+            }
         }
-        return aliases.nextElement();
+        throw new KeyStoreException("No private key entry found in keystore.");
     }
+
 
     @Override
     public String getProvider() {
@@ -164,12 +171,11 @@ public class PKCS12KeyStoreProvider implements KeyStoreProvider {
         if (privateKey != null) return privateKey;
 
         loadKeyStore();
-        String alias = getFirstAlias();
-
+        String alias = getSigningAlias();
         try {
             Key key = keyStore.getKey(alias, cachedPassword);
             if (!(key instanceof PrivateKey)) {
-                throw new PrivateKeyAccessException("Key is not a private key.");
+                throw new PrivateKeyAccessException("No private key entry found in keystore.");
             }
             privateKey = (PrivateKey) key;
             return privateKey;
@@ -184,7 +190,7 @@ public class PKCS12KeyStoreProvider implements KeyStoreProvider {
         if (certificate != null) return certificate;
 
         loadKeyStore();
-        String alias = getFirstAlias();
+        String alias = getSigningAlias();
         Certificate cert = keyStore.getCertificate(alias);
         if (!(cert instanceof X509Certificate)) {
             throw new CertificateNotFoundException("Certificate not found in keystore.");
@@ -198,10 +204,18 @@ public class PKCS12KeyStoreProvider implements KeyStoreProvider {
     public Certificate[] getCertificateChain() throws KeyStoreException {
         if (certificateChain != null) return certificateChain;
 
-        String alias = getFirstAlias();
+        String alias = getSigningAlias();
         Certificate[] chain = keyStore.getCertificateChain(alias);
+
         if (chain == null || chain.length == 0) {
-            throw new KeyStoreException("Certificate chain is empty.");
+            // Fallback: try to get just the single certificate
+            Certificate cert = keyStore.getCertificate(alias);
+            if (cert == null) {
+                throw new KeyStoreException("No certificate found for alias: " + alias);
+            }
+
+            System.err.println("[WARN] Certificate chain is missing. Using only signer certificate.");
+            chain = new Certificate[]{cert};
         }
 
         certificateChain = chain;

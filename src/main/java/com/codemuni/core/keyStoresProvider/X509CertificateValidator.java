@@ -17,6 +17,7 @@ public interface X509CertificateValidator {
     boolean isSignatureAlgorithmSecure(X509Certificate certificate);
 
     boolean isSelfSigned(X509Certificate certificate);
+
     boolean isEndEntity(X509Certificate certificate);
 
     boolean isRevoked(X509Certificate certificate); // validate revocation status of the certificate using OCSP

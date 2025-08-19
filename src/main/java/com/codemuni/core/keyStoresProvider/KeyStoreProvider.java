@@ -14,7 +14,7 @@ public interface KeyStoreProvider {
     List<KeystoreAndCertificateInfo> loadCertificates();
 
     public String getProvider() throws Exception;
-    public PrivateKey getPrivateKey() throws KeyStoreInitializationException, CertificateNotFoundException, PrivateKeyAccessException, CertificateExpiredException, NotADigitalSignatureException, KeyStoreException, UserCancelledPasswordEntryException, NotAPrivateKeyException;
+    public PrivateKey getPrivateKey() throws KeyStoreInitializationException, CertificateNotFoundException, PrivateKeyAccessException, CertificateExpiredException, NotADigitalSignatureException, KeyStoreException, UserCancelledPasswordEntryException;
     public X509Certificate getCertificate() throws KeyStoreInitializationException, CertificateNotFoundException, CertificateExpiredException, NotADigitalSignatureException, KeyStoreException, UserCancelledPasswordEntryException;
     public Certificate[] getCertificateChain() throws KeyStoreException, CertificateExpiredException, NotADigitalSignatureException;
 
