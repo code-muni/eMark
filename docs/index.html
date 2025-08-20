@@ -1,13 +1,63 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" x-data="app()" x-init="fetchGitHubStars()">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>eMark - PDF Signing Application</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js" defer></script>
+    <style>
+        @keyframes gradient-x {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .animate-gradient-x {
+            background-size: 200% 200%;
+            animation: gradient-x 4s ease infinite;
+        }
+        .gradient-text {
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-b from-gray-900 via-gray-950 to-black text-gray-100 font-sans">
+<body class="bg-gradient-to-b from-gray-900 via-gray-950 to-black text-gray-100 font-sans min-h-screen flex flex-col">
+
+<!-- Header -->
+<header class="bg-gray-900/50 backdrop-blur-sm sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <!-- Left: Profile -->
+        <a href="https://github.com/code-muni" target="_blank" class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.5-3.9-1.5-.5-1.2-1.1-1.6-1.1-1.6-.9-.6.1-.6.1-.6 1 .1 1.5 1.1 1.5 1.1.9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.7-1.3-2.6-.3-5.4-1.3-5.4-6 0-1.3.5-2.3 1.1-3.2-.1-.3-.5-1.5.1-3.1 0 0 .9-.3 3 .1.9-.2 1.9-.3 2.9-.3s2 .1 2.9.3c2.1-.4 3-.1 3-.1.6 1.6.2 2.8.1 3.1.7.9 1.1 1.9 1.1 3.2 0 4.7-2.8 5.7-5.5 6 .4.3.8.9.8 1.9v2.8c0 .4.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/>
+            </svg>
+            <span>code-muni</span>
+        </a>
+
+        <!-- Center: GitHub Stars -->
+        <a href="https://github.com/code-muni/eMark" target="_blank"
+           class="px-4 py-2 bg-gray-800 rounded-lg shadow  transition flex items-center gap-2">
+            ⭐ <span x-text="stars">...</span> Stars
+        </a>
+
+        <!-- Right: More Projects & Theme Toggle -->
+        <div class="flex items-center gap-4">
+            <a href="projects.html" target="_blank"
+               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow transition">
+                🚀 See More Projects
+            </a>
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-800 hidden" aria-label="Toggle theme">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 3v3m0 18v-3m9-9h-3m-6 0H3m18 6h-3m-6 0H3m0-9v3m0 6v3"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</header>
+
 
 <!-- Hero Section -->
 <section class="relative text-center py-20">
@@ -21,74 +71,178 @@
     <!-- Downloads -->
     <div class="mt-8 flex flex-wrap justify-center gap-4 relative z-10">
         <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.exe"
-           class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg hover:scale-105 transition">⬇
+           class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg  transition">⬇
             Windows</a>
         <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.deb"
-           class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg hover:scale-105 transition">⬇
+           class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg  transition">⬇
             Linux</a>
         <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.jar"
-           class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg hover:scale-105 transition">⬇
+           class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg  transition">⬇
             JAR (Cross-Platform)</a>
+    </div>
+</section>
+
+<!-- Motivation Section -->
+<section class="max-w-4xl mx-auto py-6 px-6 my-8">
+    <div class="relative p-[2px] rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x">
+        <div class="bg-gray-800/70 backdrop-blur-lg rounded-xl p-8 text-center  transform transition-transform duration-300 shadow-lg">
+            <h2 class="text-2xl font-bold text-indigo-400 mb-4">💡 The Inspiration Behind eMark</h2>
+            <p class="text-gray-300 text-lg leading-relaxed">
+                In my search for a reliable, free PDF signing solution on Linux, I realized there was a critical gap: existing tools either lacked support for PKCS#11/PKCS#12/PFX certificates or only offered limited verification features like Adobe Acrobat DC.
+                This challenge sparked a mission — to build <b>eMark</b>, a secure, cross-platform PDF signer that empowers users with true certificate flexibility, robust verification, and a seamless experience.
+                Every feature, every line of code reflects a commitment to quality, openness, and the belief that digital signatures should be accessible to everyone.
+            </p>
+        </div>
     </div>
 </section>
 
 <!-- Features -->
 <section class="max-w-6xl mx-auto py-16 px-6">
-    <h2 class="text-3xl font-bold text-center mb-10">✨ Features</h2>
+    <h2 class="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+        ✨ Features
+    </h2>
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-            <h3 class="font-semibold text-lg mb-2">Multiple Signing Methods</h3>
-            <p class="text-gray-400 text-sm">Supports Windows Certificate Store, PKCS#11/HSM, and PFX/PKCS#12 files.</p>
+        <!-- Feature Card Template -->
+        <div class="relative p-[2px] rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x h-full">
+            <div class="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg transform transition-transform duration-300 w-full h-full">
+                <h3 class="font-semibold text-lg mb-2">Multiple Signing Methods 🖊️</h3>
+                <p class="text-gray-300 text-sm">Seamlessly sign PDFs using Windows Certificate Store, PKCS#11/HSM devices, or PFX/PKCS#12 files.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-gray-900">💳 Multiple Tokens Support</span>
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-500 text-gray-900">🔒 Secure & Reliable</span>
+                </div>
+            </div>
         </div>
-        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-            <h3 class="font-semibold text-lg mb-2">Cross-Platform</h3>
-            <p class="text-gray-400 text-sm">Runs on Windows, Linux, and macOS with the same smooth UI.</p>
+
+
+        <div class="relative p-[2px] rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x h-full">
+            <div class="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg transform transition-transform duration-300 w-full h-full">
+                <h3 class="font-semibold text-lg mb-2">Cross-Platform 🌐</h3>
+                <p class="text-gray-300 text-sm">Enjoy a seamless experience on Windows, Linux, and macOS with a consistent, smooth UI.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-500 text-white">💻 Multi-OS Support</span>
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-500 text-white">⚡ Consistent UI</span>
+                </div>
+            </div>
         </div>
-        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-            <h3 class="font-semibold text-lg mb-2">Advanced Security</h3>
-            <p class="text-gray-400 text-sm">Timestamping, TSA, password-protection & LTV validation included.</p>
+
+
+        <!-- Advanced Security -->
+        <div class="relative p-[2px] rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x h-full">
+            <div class="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg transform transition-transform duration-300 w-full h-full">
+                <h3 class="font-semibold text-lg mb-3">Advanced Security 🔐</h3>
+                <p class="text-gray-300 text-sm mb-4">Protect your PDFs with multiple layers of security and ensure compliance.</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-500 text-gray-900">⏱️ Timestamping</span>
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-500 text-gray-900">✅ LTV Validation</span>
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500 text-white">🔒 Password-Protected</span>
+                </div>
+            </div>
         </div>
-        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-            <h3 class="font-semibold text-lg mb-2">User-Friendly UI</h3>
-            <p class="text-gray-400 text-sm">Modern dark theme, drag & drop, and visual signature placement.</p>
+
+        <!-- User-Friendly UI -->
+        <div class="relative p-[2px] rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x h-full">
+            <div class="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg transform transition-transform duration-300 w-full h-full">
+                <h3 class="font-semibold text-lg mb-2">User-Friendly UI 🖌️</h3>
+                <p class="text-gray-300 text-sm">Modern dark theme, drag & drop functionality, and visual signature placement with detailed options.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-500 text-white">🎨 Intuitive Design</span>
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-purple-500 text-white">🖱️ Easy Interaction</span>
+                </div>
+            </div>
         </div>
-        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-            <h3 class="font-semibold text-lg mb-2">Open Source</h3>
-            <p class="text-gray-400 text-sm">Community-driven project with GitHub contributions.</p>
+
+        <!-- Open Source -->
+        <div class="relative p-[2px] rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x h-full">
+            <div class="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg transform transition-transform duration-300 w-full h-full">
+                <h3 class="font-semibold text-lg mb-2">Open Source 🌍</h3>
+                <p class="text-gray-300 text-sm">Community-driven project with contributions on GitHub, ensuring transparency and collaboration.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-500 text-gray-900">💡 Community Powered</span>
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-indigo-500 text-white">🔗 GitHub Contributions</span>
+                </div>
+            </div>
         </div>
+
+        <!-- Free & Secure -->
+        <div class="relative p-[2px] rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-gradient-x h-full">
+            <div class="bg-gray-800/70 backdrop-blur-lg rounded-2xl p-6 shadow-lg transform transition-transform duration-300 w-full h-full">
+                <h3 class="font-semibold text-lg mb-2">Free & Secure 🆓🔒</h3>
+                <p class="text-gray-300 text-sm">Completely free to use, with strong security features to protect your documents and data.</p>
+                <div class="flex flex-wrap gap-2 mt-4">
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-pink-500 text-white">🔐 Strong Security</span>
+                    <span class="px-3 py-1 text-xs font-semibold rounded-full bg-green-500 text-gray-900">🆓 Completely Free</span>
+                </div>
+            </div>
+        </div>
+
     </div>
 </section>
 
 <!-- Gallery -->
-<section class="max-w-6xl mx-auto py-16 px-6" x-data="{ selected: null }">
+<section class="max-w-6xl mx-auto py-16 px-6" x-data="{
+    selected: null,
+    images: [
+        'main.png',
+        'pdf-view.png',
+        'signature-appearance.png',
+        'certificate-selection.png',
+        'save-signed-file-dialog.png',
+        'setting-keystore.png',
+        'setting-security.png'
+    ],
+    openLightbox(img) {
+        this.selected = `https://raw.githubusercontent.com/code-muni/eMark/main/docs/images/${img}`;
+        document.body.style.overflow = 'hidden';
+    },
+    closeLightbox() {
+        this.selected = null;
+        document.body.style.overflow = '';
+    }
+}" @keyup.escape="closeLightbox()">
     <h2 class="text-3xl font-bold text-center mb-10">🖼 Screenshots</h2>
     <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <template x-for="(img, index) in [
-            'main.png',
-            'pdf-view.png',
-            'signature-appearance.png',
-            'certificate-selection.png',
-            'save-signed-file-dialog.png',
-            'setting-keystore.png',
-            'setting-security.png'
-        ]" :key="index">
+        <template x-for="(img, index) in images" :key="index">
             <img
-                    :src="'https://raw.githubusercontent.com/code-muni/eMark/main/docs/images/' + img"
-                    @click="selected = 'https://raw.githubusercontent.com/code-muni/eMark/main/docs/images/' + img"
-                    class="rounded-xl shadow-lg cursor-pointer hover:scale-105 transition"
-                    :alt="img"
+                :src="`https://raw.githubusercontent.com/code-muni/eMark/main/docs/images/${img}`"
+                @click="openLightbox(img)"
+                loading="lazy"
+                class="rounded-xl shadow-lg cursor-pointer transition-transform duration-300 hover:scale-105"
+                :alt="`Screenshot ${index + 1}`"
+                width="400"
+                height="300"
             >
         </template>
-
-
     </div>
 
     <!-- Lightbox -->
-    <div x-show="selected" x-transition class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-        <img :src="selected" class="max-h-[90%] max-w-[90%] rounded-lg shadow-2xl" alt="">
-        <button @click="selected = null" class="absolute top-6 right-6 text-gray-300 text-3xl hover:text-white">
-            &times;
-        </button>
+    <div
+        x-show="selected"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4"
+        @click.self="closeLightbox()"
+    >
+        <div class="relative max-w-full max-h-full">
+            <img
+                :src="selected"
+                class="max-h-[90vh] max-w-full rounded-lg shadow-2xl"
+                alt="Enlarged view"
+                @load="$el.style.opacity = '1'"
+                style="opacity: 0; transition: opacity 0.3s ease-in-out;"
+            >
+            <button
+                @click="closeLightbox()"
+                class="absolute -top-12 right-0 text-gray-300 hover:text-white text-4xl focus:outline-none"
+                aria-label="Close lightbox"
+            >
+                &times;
+            </button>
+        </div>
     </div>
 </section>
 
@@ -108,5 +262,25 @@
     <p>Made with ❤️ by <a href="https://github.com/code-muni" class="text-indigo-400 hover:underline">CodeMuni</a></p>
     <p class="text-sm mt-1">Licensed under AGPL 3.0</p>
 </footer>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('app', () => ({
+            stars: '...',
+            async fetchGitHubStars() {
+                try {
+                    const response = await fetch("https://api.github.com/repos/code-muni/eMark");
+                    if (!response.ok) throw new Error('Failed to fetch');
+                    const data = await response.json();
+                    this.stars = data.stargazers_count?.toLocaleString() || '0';
+                } catch (error) {
+                    console.error('Error fetching GitHub stars:', error);
+                    this.stars = '0';
+                }
+            }
+        }));
+    });
+</script>
+
 </body>
 </html>

@@ -46,6 +46,8 @@
 
 Check out our [Image Gallery](docs/image-gallery.md) to see eMark in action with detailed screenshots of all the features and interface elements.
 
+Also, explore our [Architecture & Workflow Diagrams](docs/diagram.md) to understand the system structure and signing process.
+
 ## 🚀 Getting Started
 
 ## 📦 Prerequisites

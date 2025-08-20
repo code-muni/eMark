@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects - CodeMuni</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@heroicons/react/24/outline"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .theme-toggle {
+            transition: all 0.3s ease;
+        }
+        .repo-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .repo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen">
+<header class="bg-gray-900/50 backdrop-blur-sm sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <!-- Left: Profile -->
+        <a href="https://github.com/code-muni" target="_blank" class="flex items-center gap-2 text-indigo-400 hover:text-indigo-300 font-semibold">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2.1c-3.2.7-3.9-1.5-3.9-1.5-.5-1.2-1.1-1.6-1.1-1.6-.9-.6.1-.6.1-.6 1 .1 1.5 1.1 1.5 1.1.9 1.5 2.4 1.1 3 .8.1-.7.4-1.1.7-1.3-2.6-.3-5.4-1.3-5.4-6 0-1.3.5-2.3 1.1-3.2-.1-.3-.5-1.5.1-3.1 0 0 .9-.3 3 .1.9-.2 1.9-.3 2.9-.3s2 .1 2.9.3c2.1-.4 3-.1 3-.1.6 1.6.2 2.8.1 3.1.7.9 1.1 1.9 1.1 3.2 0 4.7-2.8 5.7-5.5 6 .4.3.8.9.8 1.9v2.8c0 .4.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/>
+            </svg>
+            <span>code-muni</span>
+        </a>
+
+        <!-- Center: GitHub Stars -->
+        <a href="https://github.com/code-muni/eMark" target="_blank"
+           class="px-4 py-2 bg-gray-800 rounded-lg shadow hover:scale-105 transition flex items-center gap-2">
+            ⭐ <span id="star-count">...</span> Stars
+        </a>
+
+        <!-- Right: More Projects & Theme Toggle -->
+        <div class="flex items-center gap-4">
+            <a href="projects.html" target="_blank"
+               class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow transition">
+                🚀 See More Projects
+            </a>
+            <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-800 hidden" aria-label="Toggle theme">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 3v3m0 18v-3m9-9h-3m-6 0H3m18 6h-3m-6 0H3m0-9v3m0 6v3"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</header>
+
+
+<section class="max-w-6xl mx-auto py-16 px-6">
+    <h1 class="text-4xl md:text-5xl font-bold text-center mb-12">
+            <span class="bg-gradient-to-r from-indigo-400 to-purple-500 text-transparent bg-clip-text">
+                📂 My GitHub Projects
+            </span>
+    </h1>
+    <div id="loading" class="text-center text-gray-400 hidden">
+        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-400 mx-auto"></div>
+        <p class="mt-4">Loading projects...</p>
+    </div>
+    <div id="error" class="text-center text-red-400 hidden">
+        <p>Failed to load projects. Please try again later.</p>
+    </div>
+    <div id="repos" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+</section>
+
+<script>
+    const repoContainer = document.getElementById('repos');
+    const loading = document.getElementById('loading');
+    const error = document.getElementById('error');
+    const themeToggle = document.getElementById('theme-toggle');
+
+    // Theme toggle functionality
+    themeToggle.addEventListener('click', () => {
+        document.documentElement.classList.toggle('dark');
+        localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // Check saved theme preference
+    if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.classList.remove('dark');
+    }
+
+    async function loadRepos() {
+        loading.classList.remove('hidden');
+        try {
+            const res = await fetch("https://api.github.com/users/code-muni/repos?sort=updated&per_page=30");
+            if (!res.ok) throw new Error('Failed to fetch repositories');
+            const repos = await res.json();
+
+            repoContainer.innerHTML = '';
+            repos.forEach(repo => {
+                const language = repo.language ?
+                    `<span class="inline-block px-2 py-1 bg-indigo-900/50 text-indigo-200 text-xs rounded-full">
+                        ${repo.language}
+                    </span>` : '';
+
+                repoContainer.innerHTML += `
+                    <div class="repo-card bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700/50">
+                        <h2 class="font-semibold text-xl mb-3">
+                            <a href="${repo.html_url}" target="_blank" class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                                ${repo.name}
+                            </a>
+                        </h2>
+                        <p class="text-gray-400 text-sm mb-4 line-clamp-2">
+                            ${repo.description || "No description available"}
+                        </p>
+                        <div class="flex flex-wrap gap-4 text-sm text-gray-500 mb-4">
+                            ${language}
+                            <span>⭐ ${repo.stargazers_count}</span>
+                            <span>🍴 ${repo.forks_count}</span>
+                            <span>🕒 Updated ${new Date(repo.updated_at).toLocaleDateString()}</span>
+                        </div>
+                        <a href="${repo.html_url}" target="_blank"
+                           class="inline-block px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm">
+                            View on GitHub
+                        </a>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            error.classList.remove('hidden');
+            console.error(err);
+        } finally {
+            loading.classList.add('hidden');
+        }
+    }
+
+    loadRepos();
+</script>
+</body>
+</html>
