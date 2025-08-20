@@ -1,6 +1,6 @@
 ---
 name: 🐛 Bug Report
-description: Report a bug to help us improve eInkSign
+description: Report a bug to help us improve eMark
 labels: ["bug"]
 ---
 
@@ -18,7 +18,7 @@ labels: ["bug"]
 ## Environment
 - **OS**: 
 - **Java Version**: 
-- **eInkSign Version**: 
+- **eMark Version**: 
 
 ## Additional Context
 <!-- Add any other context about the problem here. -->

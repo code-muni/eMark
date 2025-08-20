@@ -1,12 +1,12 @@
-# ValiSign - Image Gallery
+# eMark - Image Gallery
 
-This document showcases the different screens and features of the ValiSign application through images.
+This document showcases the different screens and features of the eMark application through images.
 
 ## Main Application
 
 ### Main Window
 ![Main Application Window](images/main.png)
-*The main window of the ValiSign application*
+*The main window of the eMark application*
 
 ## Document Signing
 

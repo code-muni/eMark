@@ -17,6 +17,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.codemuni.utils.AppConstants.APP_NAME;
+
 public class CertificateListDialog extends JDialog {
     private static final Color COLOR_BACKGROUND = new Color(34, 34, 34); // base UI
     private static final Color COLOR_BORDER_SELECTED = new Color(77, 145, 218);
@@ -36,7 +38,7 @@ public class CertificateListDialog extends JDialog {
     private JPanel selectedCard;
 
     public CertificateListDialog(Frame parent, List<KeystoreAndCertificateInfo> certificates) {
-        super(parent, "Valisign - Choose Certificate", true);
+        super(parent, APP_NAME + " - Choose Certificate", true);
         this.certificateList = certificates != null ? certificates : new ArrayList<>();
 
         buildUI();

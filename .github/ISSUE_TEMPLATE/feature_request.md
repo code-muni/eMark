@@ -1,6 +1,6 @@
 ---
 name: ✨ Feature Request
-description: Suggest an idea for eInkSign
+description: Suggest an idea for eMark
 labels: ["enhancement"]
 ---
 
