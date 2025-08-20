@@ -70,16 +70,33 @@
 
     <!-- Downloads -->
     <div class="mt-8 flex flex-wrap justify-center gap-4 relative z-10">
+
+        <!-- Windows -->
         <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.exe"
-           class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg  transition">⬇
-            Windows</a>
+           class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg transition flex items-center gap-2">
+            <!-- Windows SVG -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M1 3.5l9-1v8h-9v-7zm10-1l9-1v8h-9v-7zm-10 10l9-1v8h-9v-7zm10-1l9-1v8h-9v-7z"/>
+            </svg>
+            Windows
+        </a>
+
+        <!-- Linux -->
         <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.deb"
-           class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg  transition">⬇
-            Linux</a>
+           class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg transition flex items-center gap-2">
+            <img src="assets/linux.icon.svg" alt="Linux" class="w-5 h-5">
+            Linux
+        </a>
+
+        <!-- macOS / JAR -->
         <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.jar"
-           class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg  transition">⬇
-            JAR (Cross-Platform)</a>
+           class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg transition flex items-center gap-2">
+            <img src="assets/mac-icon.svg" alt="macOS" class="w-5 h-5">
+            JAR (Cross-Platform)
+        </a>
+
     </div>
+
 </section>
 
 <!-- Motivation Section -->
