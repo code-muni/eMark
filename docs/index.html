@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eMark - PDF Signing Application</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.13.5/cdn.min.js" defer></script>
+</head>
+<body class="bg-gradient-to-b from-gray-900 via-gray-950 to-black text-gray-100 font-sans">
+
+<!-- Hero Section -->
+<section class="relative text-center py-20">
+    <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/30 to-purple-600/30 blur-3xl opacity-30"></div>
+    <img src="https://github.com/code-muni/eMark/blob/v1.0.0/docs/images/logo.png?raw=true" alt="eMark Logo"
+         class="mx-auto w-28 relative z-10 mb-6 drop-shadow-lg">
+    <h1 class="text-5xl font-extrabold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent relative z-10">
+        eMark</h1>
+    <p class="mt-4 text-gray-400 text-lg relative z-10">Secure • Fast • Reliable PDF Signing</p>
+
+    <!-- Downloads -->
+    <div class="mt-8 flex flex-wrap justify-center gap-4 relative z-10">
+        <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.exe"
+           class="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl shadow-lg hover:scale-105 transition">⬇
+            Windows</a>
+        <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.deb"
+           class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl shadow-lg hover:scale-105 transition">⬇
+            Linux</a>
+        <a href="https://github.com/code-muni/eMark/releases/download/v1.0.0/eMark-1.0.0.jar"
+           class="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-lg hover:scale-105 transition">⬇
+            JAR (Cross-Platform)</a>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="max-w-6xl mx-auto py-16 px-6">
+    <h2 class="text-3xl font-bold text-center mb-10">✨ Features</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+            <h3 class="font-semibold text-lg mb-2">Multiple Signing Methods</h3>
+            <p class="text-gray-400 text-sm">Supports Windows Certificate Store, PKCS#11/HSM, and PFX/PKCS#12 files.</p>
+        </div>
+        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+            <h3 class="font-semibold text-lg mb-2">Cross-Platform</h3>
+            <p class="text-gray-400 text-sm">Runs on Windows, Linux, and macOS with the same smooth UI.</p>
+        </div>
+        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+            <h3 class="font-semibold text-lg mb-2">Advanced Security</h3>
+            <p class="text-gray-400 text-sm">Timestamping, TSA, password-protection & LTV validation included.</p>
+        </div>
+        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+            <h3 class="font-semibold text-lg mb-2">User-Friendly UI</h3>
+            <p class="text-gray-400 text-sm">Modern dark theme, drag & drop, and visual signature placement.</p>
+        </div>
+        <div class="bg-gray-800/50 backdrop-blur-lg p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+            <h3 class="font-semibold text-lg mb-2">Open Source</h3>
+            <p class="text-gray-400 text-sm">Community-driven project with GitHub contributions.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Gallery -->
+<section class="max-w-6xl mx-auto py-16 px-6" x-data="{ selected: null }">
+    <h2 class="text-3xl font-bold text-center mb-10">🖼 Screenshots</h2>
+    <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <template x-for="(img, index) in [
+            'main.png',
+            'pdf-view.png',
+            'signature-appearance.png',
+            'certificate-selection.png',
+            'save-signed-file-dialog.png',
+            'setting-keystore.png',
+            'setting-security.png'
+        ]" :key="index">
+            <img
+                    :src="'https://raw.githubusercontent.com/code-muni/eMark/main/docs/images/' + img"
+                    @click="selected = 'https://raw.githubusercontent.com/code-muni/eMark/main/docs/images/' + img"
+                    class="rounded-xl shadow-lg cursor-pointer hover:scale-105 transition"
+                    :alt="img"
+            >
+        </template>
+
+
+    </div>
+
+    <!-- Lightbox -->
+    <div x-show="selected" x-transition class="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+        <img :src="selected" class="max-h-[90%] max-w-[90%] rounded-lg shadow-2xl" alt="">
+        <button @click="selected = null" class="absolute top-6 right-6 text-gray-300 text-3xl hover:text-white">
+            &times;
+        </button>
+    </div>
+</section>
+
+<!-- Usage -->
+<section class="max-w-4xl mx-auto py-16 px-6">
+    <h2 class="text-3xl font-bold text-center mb-10">📖 Quick Start</h2>
+    <div class="space-y-6">
+        <div class="bg-gray-800/50 p-5 rounded-xl shadow">1. Open your PDF document</div>
+        <div class="bg-gray-800/50 p-5 rounded-xl shadow">2. Click <b>Begin Sign</b> & place signature</div>
+        <div class="bg-gray-800/50 p-5 rounded-xl shadow">3. Select certificate & enter password</div>
+        <div class="bg-gray-800/50 p-5 rounded-xl shadow">4. Save the signed PDF</div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-gray-900 py-8 text-center text-gray-400">
+    <p>Made with ❤️ by <a href="https://github.com/code-muni" class="text-indigo-400 hover:underline">CodeMuni</a></p>
+    <p class="text-sm mt-1">Licensed under AGPL 3.0</p>
+</footer>
+</body>
+</html>

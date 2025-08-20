@@ -21,9 +21,13 @@
   - Windows Certificate Store integration
   - PKCS#11/HSM support (multi-device support)
   - PFX/PKCS#12 file support
-- **Cross-Platform**
-  - Works on Windows, macOS, and Linux
-  - Consistent UI experience across platforms
+* **Cross-Platform Support**
+    * **Executable JAR** works on Windows, macOS, and Linux
+    * Native installers available for:
+        * Windows (`.exe`)
+        * Linux Ubuntu/Debian (`.deb`)
+    * macOS installer coming soon 🚀
+    * Consistent UI experience across platforms
 - **Advanced Security**
   - Support for hardware security modules (HSM)
   - Timestamping support
@@ -44,12 +48,25 @@ Check out our [Image Gallery](docs/image-gallery.md) to see eMark in action with
 
 ## 🚀 Getting Started
 
-### Prerequisites
+## 📦 Prerequisites
 
-- **Java 8 (JDK 8) or later**
-  - Windows: [Download Java](https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html)
-  - macOS: `brew install openjdk@8`
-  - Linux: `sudo apt-get install openjdk-8-jdk`
+Before installing or running **eMark**, make sure you have:
+
+* **Java SE 8 (JDK or JRE)** installed
+
+    * ⚠️ **Exactly Java 8 is required**
+    * Not compatible with Java 7 or Java 9+
+    * Windows: [Download Java](https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html)
+    * macOS: `brew install openjdk@8`
+    * Linux: `sudo apt-get install openjdk-8-jdk`
+* A supported operating system:
+
+    * Windows 7 or later (64-bit recommended)
+    * Linux Ubuntu 18.04+ / Debian
+    * macOS (JAR only, installer coming soon)
+* A valid **digital signing certificate** (Windows Keystore, PKCS#11 token, or PKCS#12/PFX file)
+
+---
 
 ### Installation
 
