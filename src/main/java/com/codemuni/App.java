@@ -18,6 +18,7 @@ import static com.codemuni.utils.AppConstants.LOGO_PATH;
 
 public class App {
 
+    public static final String APP_VERSION = "1.0.1";
     private static final Log log = LogFactory.getLog(App.class);
 
     static {

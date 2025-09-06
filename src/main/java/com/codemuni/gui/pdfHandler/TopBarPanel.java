@@ -1,5 +1,6 @@
 package com.codemuni.gui.pdfHandler;
 
+import com.codemuni.utils.VersionManager;
 import com.formdev.flatlaf.ui.FlatUIUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -9,11 +10,12 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 /**
- * Self-contained top bar with:
+ * Top bar panel with:
  * - Open PDF button
  * - Settings button
  * - Begin/Cancel Sign button
  * - Page info label
+ * - Version status label (auto-check on startup, hides if up-to-date)
  */
 public class TopBarPanel extends JPanel {
     private static final String OPEN_PDF_TEXT = "Open PDF";
@@ -25,6 +27,7 @@ public class TopBarPanel extends JPanel {
     private final JButton signBtn;
     private final JButton settingsBtn;
     private final JLabel pageInfoLabel;
+    private final JLabel versionStatusLabel;
 
     private boolean signMode = false;
 
@@ -33,6 +36,7 @@ public class TopBarPanel extends JPanel {
         setBorder(new EmptyBorder(10, 10, 10, 10));
         setBackground(FlatUIUtils.getUIColor("Panel.background", Color.WHITE));
 
+        // -------------------- Buttons --------------------
         openBtn = UiFactory.createButton(OPEN_PDF_TEXT, new Color(0x007BFF));
         openBtn.addActionListener(e -> onOpen.run());
 
@@ -47,19 +51,54 @@ public class TopBarPanel extends JPanel {
         settingsBtn = UiFactory.createButton("Settings", new Color(0x6C757D));
         settingsBtn.addActionListener(e -> onSettings.run());
 
+        // -------------------- Version Status Label --------------------
+        versionStatusLabel = new JLabel("Checking for updates...");
+        versionStatusLabel.setFont(new Font("SansSerif", Font.PLAIN, 13));
+        versionStatusLabel.setForeground(Color.LIGHT_GRAY);
+        versionStatusLabel.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
         pageInfoLabel = new JLabel("");
         pageInfoLabel.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
+        // -------------------- Layout --------------------
         JPanel centerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         centerPanel.setOpaque(false);
         centerPanel.add(pageInfoLabel);
         centerPanel.add(signBtn);
 
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        rightPanel.setOpaque(false);
+        rightPanel.add(versionStatusLabel);
+        rightPanel.add(settingsBtn);
+
         add(UiFactory.wrapLeft(openBtn), BorderLayout.WEST);
         add(centerPanel, BorderLayout.CENTER);
-        add(UiFactory.wrapRight(settingsBtn), BorderLayout.EAST);
+        add(rightPanel, BorderLayout.EAST);
+
+        // -------------------- Auto Startup Version Check --------------------
+        VersionManager.checkUpdateAsync(new VersionManager.VersionCheckCallback() {
+            @Override
+            public void onResult(final boolean updateAvailable) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (updateAvailable) {
+                            versionStatusLabel.setText("Update available!");
+                            versionStatusLabel.setForeground(new Color(0xFF6B6B));
+                            VersionManager.makeLabelClickable(versionStatusLabel);
+                            versionStatusLabel.setVisible(true);
+                        } else {
+                            versionStatusLabel.setVisible(false); // hide if no update
+                        }
+                    }
+                });
+            }
+        });
+
+
     }
 
+    // -------------------- Helper Methods --------------------
     public void setPageInfoText(String text) {
         pageInfoLabel.setText(text);
     }
@@ -72,8 +111,7 @@ public class TopBarPanel extends JPanel {
         openBtn.setEnabled(enabled);
         settingsBtn.setEnabled(enabled);
         signBtn.setEnabled(enabled);
-
-        setSignMode(!enabled); // Update button text
+        setSignMode(!enabled);
     }
 
     public void setLoading(boolean loading) {

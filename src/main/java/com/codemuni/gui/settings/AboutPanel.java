@@ -2,6 +2,7 @@ package com.codemuni.gui.settings;
 
 import com.codemuni.gui.DialogUtils;
 import com.codemuni.utils.Utils;
+import com.codemuni.utils.VersionManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -28,6 +29,8 @@ public class AboutPanel extends JPanel {
     private static final int LOGO_SIZE = 72;
     private static final Color LINK_COLOR = new Color(66, 133, 244);  // Blue
     private static final Color LINK_HOVER = LINK_COLOR.darker();
+
+    private final JButton versionBtn;
 
     public AboutPanel() {
         super(new BorderLayout());
@@ -69,6 +72,61 @@ public class AboutPanel extends JPanel {
         linksPanel.add(createStyledLink("💻 GitHub", APP_WEBSITE)); // fixed GitHub link
         linksPanel.setBorder(new EmptyBorder(8, 0, 15, 0));
 
+        // --- Version Check Button ---
+        versionBtn = new JButton("Check Update");
+        versionBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        versionBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        versionBtn.addActionListener(e ->
+                VersionManager.checkUpdateAsync(new VersionManager.VersionCheckCallback() {
+                    @Override
+                    public void onResult(final boolean updateAvailable) {
+                        SwingUtilities.invokeLater(new Runnable() {
+                            @Override
+                            public void run() {
+                                if (updateAvailable) {
+                                    int result = JOptionPane.showOptionDialog(
+                                            AboutPanel.this,
+                                            "<html><div style='text-align:center;'>"
+                                                    + "<p style='font-size:12pt; color:#DDDDDD;'>"
+                                                    + "A new version of <b>eMark</b> is available.</p>"
+                                                    + "<p style='font-size:11pt; color:#AAAAAA; margin-top:5px;'>"
+                                                    + "Visit GitHub to download the latest release.</p>"
+                                                    + "</div></html>",
+                                            "Update Available",
+                                            JOptionPane.YES_NO_OPTION,
+                                            JOptionPane.INFORMATION_MESSAGE,
+                                            null,
+                                            new String[]{"Download", "Later"},
+                                            "Download"
+                                    );
+
+                                    if (result == JOptionPane.YES_OPTION) {
+                                        try {
+                                            Desktop.getDesktop().browse(new URI(VersionManager.GITHUB_RELEASES_LATEST));
+                                        } catch (Exception ex) {
+                                            JOptionPane.showMessageDialog(AboutPanel.this, "Unable to open browser.", "Error", JOptionPane.ERROR_MESSAGE);
+                                        }
+                                    }
+                                } else {
+                                    JOptionPane.showMessageDialog(
+                                            AboutPanel.this,
+                                            "<html><div style='text-align:center;'>"
+                                                    + "<p style='font-size:12pt; color:#DDDDDD;'>"
+                                                    + "You are running the <b>latest version</b> of <b>eMark</b>.</p>"
+                                                    + "</div></html>",
+                                            "Up to Date",
+                                            JOptionPane.INFORMATION_MESSAGE
+                                    );
+                                }
+                            }
+                        });
+                    }
+                })
+        );
+
+
+
+
         // --- Footer ---
         JLabel copyrightLabel = new JLabel(
                 "© " + Year.now().getValue() + " " + APP_AUTHOR + ". All rights reserved."
@@ -84,6 +142,7 @@ public class AboutPanel extends JPanel {
         card.add(versionLabel);
         card.add(descriptionPane);
         card.add(linksPanel);
+        card.add(versionBtn);  // <- add button here
         card.add(copyrightLabel);
         card.add(Box.createVerticalGlue());
 

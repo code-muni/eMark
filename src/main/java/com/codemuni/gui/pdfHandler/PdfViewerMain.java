@@ -193,10 +193,12 @@ public class PdfViewerMain extends JFrame {
             }
 
             @Override
-            public void dragOver(DropTargetDragEvent dtde) { }
+            public void dragOver(DropTargetDragEvent dtde) {
+            }
 
             @Override
-            public void dropActionChanged(DropTargetDragEvent dtde) { }
+            public void dropActionChanged(DropTargetDragEvent dtde) {
+            }
 
             @Override
             public void dragExit(DropTargetEvent dte) {
