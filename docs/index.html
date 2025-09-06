@@ -822,26 +822,26 @@
             const downloadUrl = event.currentTarget.href;
             const modal = document.getElementById('starPromptModal');
             modal.classList.remove('hidden');
-            
+
             // Handle download after interaction
             const githubLink = modal.querySelector('a[href^="https://github.com"]');
             const laterLink = modal.querySelector('a[href="#"]');
-            
+
             const proceed = () => {
                 modal.classList.add('hidden');
                 window.location.href = downloadUrl;
             };
-            
+
             githubLink.onclick = laterLink.onclick = (e) => {
                 e.preventDefault();
                 proceed();
             };
-            
+
             return false;
         }
         return true;
     }
-    
+
     // Add event listeners when page loads
     document.addEventListener('DOMContentLoaded', function() {
         const downloadButtons = document.querySelectorAll('a[href*="github.com/code-muni/eMark/releases/download/"]');
@@ -849,7 +849,7 @@
             btn.addEventListener('click', showStarPrompt);
         });
     });
-    
+
     document.addEventListener('alpine:init', () => {
       Alpine.data('app', () => ({
         stars: '...',
