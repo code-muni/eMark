@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <!-- Homepage -->
+    <url>
+        <loc>https://code-muni.github.io/eMark/</loc>
+        <lastmod>2025-09-06</lastmod>
+        <priority>1.0</priority>
+        <changefreq>weekly</changefreq>
+    </url>
+
+    <!-- Projects Page -->
+    <url>
+        <loc>https://code-muni.github.io/eMark/projects.html</loc>
+        <lastmod>2025-09-06</lastmod>
+        <priority>0.8</priority>
+        <changefreq>monthly</changefreq>
+    </url>
+
+    <!-- Convert these .md to .html when ready -->
+    <url>
+        <loc>https://code-muni.github.io/eMark/diagram.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://code-muni.github.io/eMark/image-gallery.html</loc>
+        <priority>0.6</priority>
+    </url>
+</urlset>

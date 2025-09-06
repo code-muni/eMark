@@ -10,7 +10,11 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.*;
 import java.io.File;
+import java.util.List;
 import java.util.prefs.Preferences;
 
 import static com.codemuni.utils.AppConstants.APP_NAME;
@@ -92,6 +96,8 @@ public class PdfViewerMain extends JFrame {
         add(pdfScrollPane, BorderLayout.CENTER);
 
         showPlaceholder(true);
+        enableDragAndDrop(placeholderPanel);
+        enableDragAndDrop(pdfScrollPane);
     }
 
     /* --------------------------
@@ -171,6 +177,57 @@ public class PdfViewerMain extends JFrame {
             }
             signModeController.resetSignModeUI();
         });
+    }
+
+    private void enableDragAndDrop(JComponent component) {
+        new DropTarget(component, DnDConstants.ACTION_COPY, new DropTargetListener() {
+
+            @Override
+            public void dragEnter(DropTargetDragEvent dtde) {
+                if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                    component.setBorder(BorderFactory.createLineBorder(Color.BLUE, 2));
+                    dtde.acceptDrag(DnDConstants.ACTION_COPY);
+                } else {
+                    dtde.rejectDrag();
+                }
+            }
+
+            @Override
+            public void dragOver(DropTargetDragEvent dtde) { }
+
+            @Override
+            public void dropActionChanged(DropTargetDragEvent dtde) { }
+
+            @Override
+            public void dragExit(DropTargetEvent dte) {
+                component.setBorder(null);
+            }
+
+            @Override
+            public void drop(DropTargetDropEvent dtde) {
+                component.setBorder(null);
+                try {
+                    Transferable tr = dtde.getTransferable();
+                    if (tr.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                        dtde.acceptDrop(DnDConstants.ACTION_COPY);
+                        List<File> files = (List<File>) tr.getTransferData(DataFlavor.javaFileListFlavor);
+                        for (File file : files) {
+                            if (file.getName().toLowerCase().endsWith(".pdf")) {
+                                selectedPdfFile = file;
+                                loadAndRenderPdf(file);
+                                break; // only handle the first PDF
+                            }
+                        }
+                        dtde.dropComplete(true);
+                    } else {
+                        dtde.rejectDrop();
+                    }
+                } catch (Exception ex) {
+                    dtde.dropComplete(false);
+                    log.error("Drag-and-drop failed", ex);
+                }
+            }
+        }, true, null);
     }
 
     /* --------------------------

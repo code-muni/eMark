@@ -14,7 +14,6 @@ import java.net.Authenticator;
 import java.net.PasswordAuthentication;
 import java.util.Map;
 
-import static com.codemuni.gui.DialogUtils.resetDialogPreferences;
 import static com.codemuni.utils.AppConstants.LOGO_PATH;
 
 public class App {
@@ -77,7 +76,6 @@ public class App {
         DialogUtils.showError(null, "Unsupported Java Version", htmlMessage);
         System.exit(1);
     }
-
 
 
     private static void setupUiDefaults() {

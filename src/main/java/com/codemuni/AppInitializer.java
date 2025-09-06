@@ -61,7 +61,7 @@ public class AppInitializer {
 
         // Set default PKCS11 paths based on OS
         if (AppConstants.isLinux) {
-            defaultConfig.pkcs11.add("/usr/lib/x86_64-linux-gnu/opensc-pkcs11.so");
+            defaultConfig.pkcs11.add("/usr/lib/WatchData/ProxKey/lib/libwdpkcs_SignatureP11.so");
         } else if (AppConstants.isMac) {
             // Common PKCS11 library paths for Mac
             defaultConfig.pkcs11.add("/Applications/CryptoIDATools.app/Contents/macOS/libcryptoid_pkcs11.dylib");
